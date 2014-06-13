@@ -29,6 +29,24 @@ module.exports = function(grunt) {
       delete options.csslintrc;
     }
 
+    // read custom rule
+    if(options.rulesAbsDir){
+      var fs = require('fs');
+
+      var rulesAbsDir = options.rulesAbsDir;
+
+      if(fs.statSync(rulesAbsDir).isDirectory()){
+        fs.readdirSync(rulesAbsDir).forEach(function(file){
+          if(path.extname(file) !== '.js'){ return; }
+          var rule = path.join(path.relative(__dirname, options.rulesAbsDir), file);
+          grunt.log.writeln('add custom-rule to: ' + rule);
+          csslint.addRule(require(rule));
+        });
+      }
+
+      delete options.rulesAbsDir;
+    }
+
     // merge external options with options specified in gruntfile
     options = _.assign( options, externalOptions );
 
